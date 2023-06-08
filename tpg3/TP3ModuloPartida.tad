@@ -1,0 +1,253 @@
+Representación:
+	Partida se representa con estr donde 
+		estr es tupla ⟨	mapa: 			puntero(Mapa),
+										jugador: 		coordenada,
+										chocolates: puntero(*mapa).chocolates, // el puntero hace referencia al mapa del Modulo Mapa.  
+										cantMov: 		nat, 
+										inmunidad: 	nat ⟩
+
+Solución Informal: 
+	- e.jugador tiene que ser una coordenada en el rango del mapa. 
+	- las coordendas dentro de e.(*mapa).chocolates están en el rango del mapa. 
+	- e.inmunidad es menor o igual a 10. 
+---
+Función de abstracción:
+	Abs:	estr	->	tipoDato	{Rep(e)}
+	(∀e: estr) Abs(e) =obs p: Partida | (1)∧(2)
+		donde: 
+		(1)	≡	mapa(p) 			=obs *e.mapa   
+		(2)	≡	jugador(p) 		=obs e.jugador 
+		(3) ≡ chocolates(p) =obs *e.chocolates 
+		(4) ≡ cantMov(p) 		=obs e.cantMov
+		(5) ≡ inmunidad(p)  =obs e.inmunidad
+---
+Interfaz:
+	Parámetros formales:
+		Géneros:	partida
+		Función:	
+			Copiar(in p: partida) -> res: partida
+			Pre ≡ {true}
+			Post ≡ {res = p} 
+			Complejidad: Θ(copy(p))
+			Descripción: Función copia de partida's.
+			---
+	Se explica con:	Partida 
+	Géneros:		partida
+	
+	Operaciones básicas: 
+		Mapa(in p: partida) -> res: mapa  
+		Pre ≡ {true} 
+		Post ≡ {res =obs mapa(p)}
+		Complejidad: Θ(1)  
+		Descripción: Devuelve una copia del Mapa
+		Aliasing: no genera aliasing
+		---
+		Jugador(in p: partida) -> res: coordenada
+		Pre  ≡ {true} 
+		Post ≡ {res =obs jugador(p)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve una copia de la coordenada actual del jugador. 
+		Aliasing: No genera aliasing. 
+		---
+		Chocolates(in p: partida) -> res: conj(coordenada)
+		Pre  ≡ {true}
+		Post ≡ {res =obs chocolates(p)} 
+		Complejidad: Θ(1) 
+		Descripción: Devuelve por copia el conjunto de chocolates en la partida.   
+		Aliasing: No genera aliasing. 
+		---
+		CantMov(in p: partida) -> res: nat 
+		Pre  ≡ {true}
+		Post ≡ {res =obs cantMov(p)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve por copia la cantidad de movimientos que realizo el jugador hasta ahora. 
+		Aliasing: No genera aliasing. 
+		---
+		Inmunidad(in p: partida) -> res: nat 
+		Pre  ≡ {true}
+		Post ≡ {res =obs inmunidad(p)}		
+		Complejidad: Θ(1)
+		Descripción: Devuelve por copia la cantidad de turnos de inmunidad. 
+		Aliasing: No genera aliasing. 
+		---
+		NuevaPartida(in m: mapa*)	-> res: partida 
+		Pre ≡ {true} 
+		Post ≡ {res =obs nuevaPartida(*m) ∧ 
+						(∀c:coordenada)( (c ∈ res.chocolates) =>L *(res.mapa).tablero[ c.x ][ c.y ] = 'C'} 
+		Complejidad: Θ(#(*(res.chocolates)))
+		Descripción: Genera una partida dado un mapa pasado por referencia
+		Aliasing: Genera aliasing porque crea un puntero a un mapa al que ya apuntaba otro puntero que fue creado en el Módulo Mapa.  
+		---
+		Mover(in p: partida, in d: dirección) -> res: partida
+		Pre  ≡ {¬ganó?(p) ∧ ¬perdió?(p) ∧ p = p₀}
+		Post ≡ {if esValida(posMovimiento(p.jugador, d)) then 	
+							if posMovimiento(p.jugador, d) ∈ (*p.mapa).paredes then 
+									res = p₀
+							else 
+								res.mapa = p₀.mapa ∧ res.jugador = posMovimiento(p.jugador, d) ∧ res.chocolates* = ((*p₀.mapa).chocolates) ∧
+								res.cantMov = p₀.cantMov + 1 ∧ res.Inmunidad = max(0,p₀.Inmunidad - 1) 
+								if *(p₀.mapa).tablero[π₀(posMovimiento(p.jugador, d))][π₁(posMovimiento(p.jugador, d))] = C then 
+									res.mapa = p₀.mapa ∧ res.jugador = posMovimiento(p.jugador, d) ∧ res.chocolates* = ((*p₀.mapa).chocolates) ∧
+									res.cantMov = p₀.cantMov + 1 ∧ res.Inmunidad = 10 ∧ *(p₀.mapa).tablero[π₀(posMovimiento(p.jugador, d))][π₁(posMovimiento(p.jugador, d))] = V 	
+								fi
+							else 	
+								res = p₀
+							fi 
+					fi							
+					 }
+		Complejidad: Θ(1)
+		Descripción: Mueve al jugador según corresponda. 
+		Aliasing: Genera aliasing porque modifica al mapa.
+		---
+		Ganó(in p: partida) -> res: bool
+		Pre ≡ {true}
+		Post ≡ {res =obs ((*p.mapa).llegada = p.jugador) } 
+		Complejidad: Θ(1)
+		Descripción: Devuelve si el jugador está en la posición de llegada del tablero.
+		Aliasing: No genera aliasing. 
+		---
+		Perdió(in p: partida) -> res: bool
+		Pre ≡ {true}
+		Post ≡ {res =obs perdió?(p) }  
+		Complejidad: Θ(1)
+		Descripción: Devuelve si el jugador está en la posición de llegada del tablero.
+		Aliasing: No genera aliasing. 
+		---
+		SiguienteMovimiento(in p: partida, in d: dirección) -> res: coordenada
+		Pre ≡ {true}
+		Post ≡ {res =obs siguienteMovimiento(p,d) } 
+		Complejidad: Θ(1)
+		Descripción: Devuelve la coordenada de la proxima posicion del jugador dada una dirección 
+								 a menos que haya una pared, en cuyo caso se queda en el mismo lugar.
+		Aliasing: No genera aliasing. 
+		---
+		PosMovimiento(in c: coordenada, in d: dirección) -> res: coordenada
+		Pre ≡ {true}
+		Post ≡ {res =obs posMovimiento(c, d)} 
+		Complejidad: Θ(1)
+		Descripción: Dada una coordenada y una dirección devuelve la coordenada inmediatamente 
+								 en la dirección pasada.  
+		Aliasing: No genera aliasing. 
+		---
+		RestringirMovimiento(in p: partida, in c: coordenada) -> res: coordenada
+		Pre  ≡ {true}
+		Post ≡ {res =obs restringirMovimiento(p, c)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve una coordenada tal que esté en los limites del mapa. 
+		Aliasing: No genera aliasing. 
+		---
+	Algoritmos del módulo:
+		iMapa(in p: partida) -> res: mapa
+			res <- *(p.mapa)
+		---
+		iJugador(in p: partida) -> res: coordenada 
+			res <- p.jugador 
+		---
+		iChocolates(in p: partida) -> res: conj(coordenada)
+			res <- p.chocolates
+		---
+		iCantMov(in p: partida) -> res: nat 
+			res <- p.CantMov 
+		---
+		iInmunidad(in p: partida) -> res: nat 
+			res <- p.inmunidad
+		---	
+		iNuevaPartida(in m: mapa) -> res: partida
+			res.mapa* = m
+			res.jugador = *m.inicio
+			res.chocolates* = m.chocolates 
+			res.inmunidad = 0
+			for e in *res.chocolates do 
+				if e = (*m).inicio then 
+					m[ e.x ][ e.y ] = 'X' 
+					res.inmunidad = 10;
+					m[ e.x ][ e.y ] = 'S' 
+				else 
+					if e = m.llegada then 
+						m[ e.x ][ e.y ] = 'Y'
+					else 
+						m[ e.x ][ e.y ] = 'C' 
+					end if
+				end if
+			endfor 
+			res.cantMov = 0;
+		---
+		iMover(in p: partida, in d: dirección) -> res: partida
+			res <- p
+			if !(siguienteMovimiento(p, d) = p.jugador) then 
+				res.jugador = siguienteMovimiento(p,d)
+				p <- *(p.mapa).tablero[siguienteMovimiento(p,d).x][siguienteMovimiento(p,d).y] 
+				res.inmunidad = max(0, p.inmunidad-1)
+				if p = 'C' then 
+				 	*(p.mapa).tablero[siguienteMovimiento(p,d).x][siguienteMovimiento(p,d).y] <- 'V' 
+					res.inmunidad = 10
+				else 
+					if p = 'Y' then 
+					*(p.mapa).tablero[siguienteMovimiento(p,d).x][siguienteMovimiento(p,d).y] <- 'L'
+					res.inmunidad = 10
+					end if 
+				res.cantMov = p.cantMov + 1 	
+			end if 	
+			---
+		iGanó(in p: partida) -> res: bool
+			res <- *(p.mapa).llegada = p.jugador 
+			---
+		iPerdió(in p: partida) -> res: bool
+			res <-  !Ganó(p) && (DistConFantasmaMasCercano(*(p.mapa).fantasmas, p.jugador) ≤ 3) && p.Inmunidad = 0
+			---
+		iSiguienteMovimiento(in p: partida, in d: dirección) -> res: coordenada
+			if (RestringirMovimineto(p,posMovimiento(p.jugador,d)) != p.jugador && *(p.mapa).tablero[posMovimiento(p.jugador,d).x][posMovimiento(p.jugador,d).y] != 'P' then
+		 		res <- posMovimiento(p.jugador, d)
+	 		else
+				res <- p.jugador
+		  end if
+			coor <- RestringirMovimiento(p, PosMovimiento(p.jugador, d))
+			if !(*(p.mapa).tablero[ coor.x ][ coor.y ] = 'P') then 
+				 res <- coor
+			else 
+				 res <- p.jugador
+			end if
+		  ---	
+		iPosMovimiento(in c: coordenada, in d: dirección) -> res: coordenada
+			res <- ⟨ c.x + (if d = DERECHA then 1 else 0),
+							c.y + (if d = Arriba then 1 else 0) ⟩
+			---
+		iRestringirMovimiento(in p: partida, in c: coordenada) -> res: coordenada	
+			res <- ⟨ max(0, min(*(p.mapa).largo - 1, c.x),
+							max(0, min(*(p.mapa).alto - 1, c.y) ⟩
+---
+Auxiliares: 
+Extendemos Modulo Int: 
+
+max(in a: int, in b: int) -> res: int 
+Pre  ≡ {true}
+Post ≡ {res =obs max(a, b)}
+Compejidad: Θ(1)
+Descripción: Devuelve el máximo entre dos enteros. 
+Aliasing: No genera aliasing. 		
+
+iMax(in a: int, in b: int) -> res: int 
+	if b > a then 
+		res <- b
+	else 
+		res <- a 
+	fi 
+	
+---	
+min(in a: int, in b: int) -> res: int 
+Pre  ≡ {true}
+Post ≡ {res =obs min(a, b)}
+Compejidad: Θ(1)
+Descripción: Devuelve el mínimo entre dos enteros. 
+Aliasing: No genera aliasing. 
+
+iMin(in a: int, in b: int) -> res: int 
+	if b < a then 
+		res <- b
+	else 
+		res <- a 
+	fi 
+				
+
+		
+		 	

@@ -1,0 +1,252 @@
+// Una coordenada se representa con tupla ⟨x:nat, y:nat⟩
+
+Representación:
+	Mapa se representa con estr donde 
+		estr es tupla ⟨	largo:			nat,
+										alto:   		nat,
+										inicio: 		coordenada,
+										llegada: 		coordenada,
+										paredes: 		conjLineal(coordenada),
+										fantasmas:  conjLineal(coordenada),
+										chocolates: conjLineal(coordenada),
+										tablero: 		arreglo[e.largo] de arreglo[e.alto] de char⟩
+
+Solución Informal:
+	- El e.inicio es distinto a e.llegada. 
+	- e.chocolates, e.paredes y e.fantasmas son disjuntos. 
+	- e.inicio. e.llegada y todas las coordenadas en e.chocolates, e.paredes 
+	  y e.fantasmas son menores o iguales que <e.largo, e.alto>. 
+	-	Las coordenadas de los 3 conjuntos, e.inicio y e.llegada son mayores a 0.  
+	- e.inicio y e.llegada no pertencen a e.paredes o e.fantasmas. 
+	- Los valores de e.tablero pueden ser P, C, F, I, L o son V. X,Y denotan el caso en el que un chocolate se encuentra en la misma 
+		coordenada que inicio y llegada respectivamente. 
+	- Para toda coordenada coor en los conjuntos, e.paredes, e.fantasmas,
+		arreglo[π₁(coor)][π₂(coor)] = inicial correspondiente. 
+		En el caso de una posicion vacia será un V. En el caso de e.inicio y e.llegada la inicial 
+		puede ser X, I para el caso de e.inicio y Y, L para e.llegada. 
+	- Para toda coordenada coor perteneciente a e.chocolates, arreglo[π₁(coor)][π₂(coor)] 
+		pueden ser igual a C, V, X, Y según lo que corresponda. 
+		
+---
+Función de abstracción:
+	Abs:	estr	->	tipoDato	{Rep(e)}
+	(∀e: estr) Abs(e) =obs m: Mapa | (1) ∧ (2) ∧ (3) ∧ (4) ∧ (5) ∧ (6) ∧ (7)
+		donde: 
+		(1)	≡	largo(m) =obs e.largo 
+		(2)	≡	alto(m) =obs e.alto 
+		(3) ≡ inicio(m) =obs e.inicio
+		(4) ≡ llegada(m) =obs e.llegada
+		(5) ≡ paredes(m) =obs e.paredes 
+		(6) ≡ fantasmas(m) =obs e.fantasmas
+		(7) ≡ chocolates(m) =obs e.chocolates 
+---
+Interfaz:
+	Parámetros formales:
+		Géneros:	mapa 
+		Función:
+			Copiar(in a: mapa) -> res: mapa
+			Pre ≡ {true} 
+			Post ≡ {res = a} 
+			Complejidad: Θ(copy(a))
+			Descripción: Función copia de mapa.
+			---
+	Se explica con:	Mapa
+	Géneros:		mapa  
+	
+	Operaciones básicas:
+		NuevoMapa(in largo, alto: nat, in inicio, llegada: coordenada, in paredes, fantasmas, chocolates: conj(coordenada))	-> res: mapa 
+		Pre ≡ {largo = largo₀ ∧ alto = alto₀ ∧ inicio = inicio₀ ∧ llegada = llegada₀ ∧ paredes = paredes₀ ∧ fantasmas = fantasmas₀ ∧ chocolates = chocolates₀} 
+		Post ≡ {res.largo = largo₀ ∧ res.alto = alto₀ ∧ res.inicio = inicio₀ 
+						∧ res.llegada = llegada₀ ∧ res.paredes = paredes₀ ∧ 
+						∧ res.fantasmas = fantasmas₀ ∧ res.chocolates = chocolates₀ ∧L
+					(∀c:coordenada)( (( c = res.inicio ∧ c ∈ res.chocolate) =>L res.tablero[ c.x ][ c.y ] = 'X' )  																			 	  ∧ 														
+													 (( c = res.llegada ∧ c ∈ res.chocolate) =>L res.tablero[ c.x ][ c.y ] = 'Y' ) 																				 	∧
+													  ( c ∈ res.paredes =>L res.tablero[ c.x ][ c.y ] = 'P' ) 																															∧ 
+													  ( c ∈ res.fantasmas =>L res.tablero[ c.x ][ c.y ] = 'F' ) 																														∧
+												 	 (( c ∈ res.chocolate ∧ c ≠ res.inicio ∧ c ≠ res.llegada) =>L res.tablero[ c.x ][ c.y ] = 'C') 												  ∧
+														( c ∉ (res.paredes ∪ res.fantasma ∪ res.chocolate U {res.inicio, res.llegada}) =>L res.tablero[ c.x ][ c.y ] = 'V' )
+													)
+												}				
+		Complejidad: Θ(alto * largo)
+		Descripción: Genera un nuevo mapa. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---		
+		Largo(in mapa: mapa) -> res: nat 
+		Pre  ≡ {true} 
+		Post ≡ {res =obs largo(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el largo del mapa. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		Alto(in mapa: mapa) -> res: nat 
+		Pre  ≡ {true} 
+		Post ≡ {res =obs alto(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el alto del mapa. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Inicio(in mapa: mapa) -> res: coordenada  
+		Pre  ≡ {true} 
+		Post ≡ {res =obs inicio(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve la coordenada de inicio. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Llegada(in mapa: mapa) -> res: coordenada  
+		Pre  ≡ {true} 
+		Post ≡ {res =obs llegada(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve la coordenada de llegada. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Paredes(in mapa: mapa) -> res: conj(coordenada)  
+		Pre  ≡ {true} 
+		Post ≡ {res =obs paredes(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el conjunto de coordenadas donde se encuentran paredes. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Fantasmas(in mapa: mapa) -> res: conj(coordenada)  
+		Pre  ≡ {true} 
+		Post ≡ {res =obs fantasmas(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el conjunto de coordenadas donde se encuentran fantasmas. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Chocolates(in mapa: mapa) -> res: conj(coordenada)  
+		Pre  ≡ {true} 
+		Post ≡ {res =obs chocolates(mapa)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el conjunto de coordenadas donde se encuentran chocolates. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Distancia(in pos1, pos2: coordenada) -> res: nat
+		Pre  ≡ {true} 
+		Post ≡ {res =obs distancia(pos1, pos2)}
+		Complejidad: Θ(1)
+		Descripción: Calcula la distancia Manhattan entre dos coordenadas. 
+		Aliasing: No presenta aspectos de aliasing.
+		--- 
+		DistConFantasmaMasCercano(in fantasmas: conj(coordenada), in pos: coordenada) -> res: nat 
+		Pre  ≡ {¬vacío?(fantasmas)}
+		Post ≡ {(∀f:coordenada)( f ∈ fantasmas₀ =>L distancia(pos,f) ≥ res  ) ∧ 
+						(∃f:coordenada)( f ∈ fantasmas₀ ∧L  distancia(pos,f) = res  )}
+		Complejidad: Θ(#(fantasmas₀))
+		Descripción: Calcula la distancia con el fantasma mas cercano. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		EnRango(in pos: coordenada, in largo, alto: nat) -> res: bool 
+		Pre  ≡ {true}
+		Post ≡ {res =obs enRango(pos, largo, alto)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve si una coordenada está dentro de los limites del mapa. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		TodasEnRango(in posiciones: conj(coordenada), in largo, alto: nat) -> res: bool 
+		Pre  ≡ {true}
+		Post ≡ {res =obs todasEnRango(posiciones, largo, alto)}
+		Complejidad: Θ(#(posiciones₀))
+		Descripción: Devuelve si todas las posiciones en un conjunto de cordenadas se 
+								 encuenteran en los limites del mapa. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+	Algoritmos del módulo: 
+		iNuevoMapa(in largo, alto: nat, in inicio, llegada: coordenada, 
+		in paredes, fantasmas, chocolates: conj(coordenada)) -> res: mapa    
+		  res <- ⟨largo, ancho, inicio, llegada, paredes, fantasmas, chocolates, tablero: arreglo[e.largo] de arreglo[e.alto] de char⟩  
+			for i ← 1, i ≤ largo, i++
+				for j ← 1, j ≤ alto, j++
+					res.tablero[i][j] <- V 
+				end for
+			end for 
+			
+			for e in res.paredes do 
+				res.tablero[e.x][e.y] <- P 
+			end for 
+			
+			for e in res.fantasmas do 
+				res.tablero[e.x][e.y] <- F 
+			end for
+			
+			for e in res.chocolates do 
+				res.tablero[e.x][e.y] <- C
+			end for
+			
+			if res.tablero[res.inicio.x][res.inicio.y] = C then 
+				res.tablero[res.inicio.x][res.inicio.y] <- X 
+			else 
+				res.tablero[res.inicio.x][res.inicio.y] <- I 
+		  end if 
+			
+			if res.tablero[res.llegada.x][res.llegada.y] = C then 
+				res.tablero[res.llegada.x][res.llegada.y] <- Y 
+			else 
+				res.tablero[res.llegada.x][res.llegada.y] <- L 
+		  end if
+	 ---
+	 iLargo(in mapa: estr) -> res: nat 
+	 res <- mapa.largo  
+	 ---	 	
+	 iAlto(in mapa: estr) -> res: nat 
+	 res <- mapa.alto
+	 ---
+	 iInicio(in mapa: estr) -> res: coordenada
+	 res <- mapa.inicio 
+	 ---
+	 iLlegada(in mapa: estr) -> res: coordenada 
+	 res <- mapa.llegada
+	 ---
+	 iParedes(in mapa: estr) -> res: conj(coordenada)
+	 res <- mapa.paredes 
+	 ---
+	 iFantasmas(in mapa: estr) -> res: conj(coordenada)
+	 res <- mapa.fantasmas
+	 ---
+	 iChocolates(in mapa: estr) -> res: conj(coordenada)
+	 res <- mapa.chocolates 
+	 ---
+	 iDistancia(in pos1, pos2: coordenada) -> res: nat 
+	 res <- |pos1.x − pos2.x| + |pos1.y − pos2.y| 
+	 ---
+	 iDistConFantasmaMasCercano(in fantasmas: conj(coordenada), in pos: coordenada) -> res: nat  																								
+	 j <- CrearIt(fantasmas)
+	 min <- Distancia(pos, *j)
+	 for e in fantasmas do
+	 	if min > Distancia(e, pos) then 
+		 	min <- e 
+		endif 
+	 end for
+	 ---
+	 iEnRango(in pos: coordenada, in largo, alto: nat) -> res: bool  
+	 res <- pos.x > 0 && pos.x ≤ largo && pos.y > 0 && pos.y ≤ alto
+	 ---
+	 iTodasEnRango(in posiciones: conj(coordenada), in largo, alto: nat) -> res: bool 
+	 res <- true 
+	 for e in posiciones do 
+	 	res <- res && EnRango(e, largo, alto)
+	 end for 
+	 
+			
+		
+		
+		
+		
+		
+		
+		
+		
+
+
+
+
+
+		
+		
+		---
+	Operaciones Auxiliares:
+		DisjuntosDeAPares(in a, b, c: conj(α)) -> res: bool 
+		Pre  ≡ {a = a₀ ∧ b = b₀ ∧ c = c₀}
+		Post ≡ {res =(#(a₀) + #(b₀) + #(c₀) = #(a₀ ∪ b₀ ∪ c₀))}				
+		Compejidad: Θ(1)
+		Descripción: Devuelve si tres conjuntos son disjuntos de a pares. 
+		Aliasing: No presenta aspectos de aliasing.  		 

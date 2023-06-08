@@ -1,0 +1,241 @@
+Representación:
+	Fichin se representa con estr donde 
+		estr es tupla ⟨	 mapa:						 puntero(mapa),
+									  alguienJugando?: 	 bool,
+										jugadorActual: 	 	 jugador, 
+										partidaActual:     puntero(partida),
+										ranking: 			     dicTrie(jugador, nat) ⟩
+
+Solución Informal:
+	- las coordendas que no sean chocolates en *e.mapa van a ser iguales a esas mismas
+	 	coordenadas en *(*(e.partidaActual).mapa). 
+	- e.alguienJugando? = true ⇐⇒ se inició la partida y el jugador no ganó. 
+--- 
+Función de abstracción:
+	Abs:	estr	->	Fichin	{Rep(e)}
+	(∀e: estr) Abs(e) =obs f: Fichin | (1) ∧ (5) ∧ (2) ∧L (3) ∧ (4)
+		donde: 
+		(1)	≡	mapa(f) =obs *e.mapa
+		(2) ≡ alguienJugando(f) =obs e.alguienJugando
+		(3) ≡ (alguienJugando(f) =>L (jugadorActual(f) =obs e.jugadorActual))
+		(4) ≡ (alguienJugando(f) =>L (partidaActual(f) =obs *e.partidaActual))
+		(5) ≡ ranking(f) =obs e.ranking 
+---
+Interfaz:
+	Parámetros formales:
+		Géneros:	fichin
+		Función:
+			Copiar(in f:fichin) -> res: fichin
+			Pre ≡ {true}
+			Post ≡ {res = f} 
+			Complejidad: Θ(copy(f))
+			Descripción: Función copia de fichin's.
+			---
+	Se explica con:	Fichin
+	Géneros:		fichin 
+	
+	Operaciones básicas:
+		Mapa(in f: fichin)	-> res: mapa
+		Pre ≡ {true}
+		Post ≡ {res =obs mapa(f)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el mapa de la partida. 
+		Aliasing: No presenta aspectos de aliasing.
+		---		
+		AlguienJugando?(in f: fichin)	-> res: bool
+		Pre  ≡ {true}
+		Post ≡ {res =obs alguienJugando?(f)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve si hay un jugador actualmente jugando. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		JugadorActual(in f: fichin)	-> res: jugador
+		Pre  ≡ {alguienJugando(f)}
+		Post ≡ {res =obs jugadorActual(f)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve al jugador actual.
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		PartidaActual(in f: fichin)	-> res: partida
+		Pre  ≡ {alguienJugando(f)}
+		Post ≡ {res =obs partidaActual(f)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve la partida actual. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Ranking(in f: fichin)	-> res: ranking
+		Pre  ≡ {true}
+		Post ≡ {res =obs ranking(f)}
+		Complejidad: Θ(1)
+		Descripción: Devuelve el ranking del fichin. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		NuevoFichin(in m: mapa) -> res: fichin 
+		Pre  ≡ {true}
+		Post ≡ {res =obs nuevoFichin(m)}
+		Complejidad: Θ(1)
+		Descripción: Dado un mapa devuelve un fichin.
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		NuevaPartida(in f: fichin, in j: jugador) -> res: fichin 
+		Pre  ≡ {¬AlguienJugando(f)}
+		Post ≡ {res =obs nuevaPartida(f, j))}
+		Complejidad: Θ(NuevaPartida(*f.mapa))
+		Descripción: Dado un fichin y un jugador arma una nueva partida. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Mover(in f: fichin, in d: dirección) -> res: fichin 
+		Pre  ≡ {alguienJugando?(f)} 
+		Post ≡ {res =obs mover(f, d)}
+		Complejidad: Θ(1)
+		Descripción: Mueve de posición al jugador de un fichin dada una dirección. 
+		Aliasing: Presenta aspectos de aliasing porque modificamos la partida.   
+		---
+		Objetivo(in f: fichin) -> res: tupla ⟨jugador, nat⟩
+		Pre  ≡ {alguienJugando?(f) ∧ def?(jugadorActual(f), ranking(f))}
+		Post ≡ {res =obs objetivo(f) }
+		Complejidad: O(J.|J|) 
+		Descripción: Devuelve una tupla con el nombre del jugador al que tiene que 
+								 superar el jugador actual con su puntaje. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		Oponente(in f: fichin) -> res: jugador 
+		Pre  ≡ {alguienJugando?(f) ∧ def?(jugadorActual(f), ranking(f))}
+		Post ≡ {res =obs oponente(f)}
+		Complejidad: O(1)
+		Descripción: Devuelve uno de los jugadores que tiene mejor puntaje que el actual. 
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Oponentes(in f: fichin) -> res: conj(jugador)
+		Pre  ≡ {alguienJugando?(f) ∧ def?(jugadorActual(f), ranking(f))}
+		Post ≡ {res =obs oponentes(f)}
+		Complejidad: O(J.|J|)  	
+		Descripción: Devuelve el conjunto de jugadores con puntaje inmediatamente superior al jugador actual. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		MejoresQue(in r: ranking, in cj: conj(jugador), in p: nat) -> res: conj(jugador)
+		Pre  ≡ {cj ⊆ claves(r)}
+		Post ≡ {res =obs mejoresQue(r, cj, p)}
+		Complejidad: O(n. |J|) donde n es la cantidad de elementos de cj.  
+		Descripción: Devuelve el conjunto con todos los jugadores que tienen mejor puntaje que el natural pasado por parametro. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		PeoresJugadores(in r: ranking, in cj: conj(jugador)) -> res: conj(jugador)
+		Pre  ≡ {cj ⊆ claves(r)∧ ¬Ø(cj)} 
+		Post ≡ {res =obs peoresJugadores(r, cj)}
+		Complejidad: Θ(n.|J|) donde n es la cantidad de elementos de cj.
+		Descripción: Devuelve el conjunto de jugadores con el peor puntaje del conjunto ingresado. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		JugadoresConPuntaje(in r: ranking, in cj: conj(jugador), in p: nat) -> res: conj(jugador)
+		Pre  ≡ {cj ⊆ claves(r)∧ ¬Ø?(cj)}
+		Post ≡ {res =obs jugadoresConPuntaje(r, cj, p)}
+		Complejidad: Θ(n.|J|) donde n es la cantidad de elementos de cj.
+		Descripción: Devuelve el conjunto de jugadores con un puntaje igual al pasado por parámetro.
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+		PeorPuntaje(in r: ranking, in cj: conj(jugador)) -> res: nat 
+		Pre  ≡ {cj ⊆ claves(r) ∧ ¬∅?(cj)}
+		Post ≡ {res =obs peorPuntaje(r, cj)}
+		Complejidad: O(n.|J|) donde n es la cantidad de elementos de cj.
+		Descripción: Devuelve el puntaje más bajo del conjunto de jugadores del ranking. 
+		Aliasing: No presenta aspectos de aliasing. 
+		---
+	Algoritmos del módulo:
+		iMapa(in f: fichin)	-> res: mapa 
+			res <- *(f.mapa)
+		---	
+		iAlguienJugando?(in f: fichin) -> res: bool
+		 	res <- f.alguienJugando?
+		---	
+		iJugadorActual(in f: fichin) -> res: jugador	
+			res <- f.jugadorActual 
+		---
+		iPartidaActual(in f: fichin) -> res: partida	
+			res <- *(f.partidaActual)
+		---
+		iRanking(in f: fichin) -> res: ranking
+			res <- f.ranking 
+		---
+		iNuevoFichin(in m: mapa) -> res: fichin 	 
+			res.mapa* = m
+			res.alguienJugando = false 
+			res.jugadorActual = " "
+			res.partidaActual = NULL 
+			res.ranking = Vacío()  
+		---
+		iNuevaPartida(in f: fichin, in j: jugador) -> res: fichin 
+			res.alguienJugando = true  
+			res.jugadorActual = j
+			res.partidaActual* = NuevaPartida(*(f.mapa)) 
+	  ---
+		iMover(in f: fichin, in d: dirección) -> res: fichin 
+		  res <- fichin 
+			if Ganó(Mover(*(f.partidaActual), d)) then 
+					if (( def?(f.jugadorActual, f.ranking) && obtener(f.jugadorActual, f.ranking) > *(f.partidaActual).CantMov) || !def?(f.jugadorActual, f.ranking)) then 
+							definir(f.jugadorActual,*(f.partidaActual).CantMov), f.ranking)	
+					endif
+					res.alguienJugando = false 	
+			else 
+				if Perdió(Mover(*(f.partidaActual), d)) then 
+						res.alguienJugando = false 
+				else 
+						Mover(*(f.partidaActual), d) 
+				end if 
+			endif 
+		---
+		iObjetivo(in f: fichin) -> res: tupla ⟨jugador, nat⟩ 
+			res <- ⟨Oponente(f), obtener(Ranking(f), Oponente(f))⟩
+		---
+		iOponente(in f: fichin) -> res: jugador
+				if #Oponentes(f) = 0 then
+					res <- JugadorActual(f)
+				else
+					it <- crearIt(Oponentes(f)) 
+					res <- Siguiente(it)
+				end if 
+		---	
+		iOponentes(in f: fichin) -> res: conj(jugador)
+			if vacio?(MejoresQue(Ranking(f), claves(Ranking(f)), obtener(Ranking(f), jugadorActual(f)))) then 
+				res <- vacio()
+			else 
+			  res <- PeoresJugadores(Ranking(f), MejoresQue(Ranking(f), claves(Ranking(f)), obtener(Ranking(f), JugadorActual(f))))
+			end if 
+		---
+		iMejoresQue(in r: ranking, in cj: conj(jugador), in p: nat) -> res: conj(jugador) 
+			res <- vacio()
+				for j in cj do 
+					if obtener(j, r) > p then 
+						Agregar(res, j)
+					end if 
+				end for 
+	  ---
+		iPeoresJugadores(in r: ranking, in cj: conj(jugador)) -> res: conj(jugador) 
+			res <- JugadoresConPuntaje(r, cj, PeorPuntaje(r, cj))
+		---
+		iJugadoresConPuntaje(in r: ranking, in cj: conj(jugador), in p: nat) -> res: conj(jugador)
+		 	res <- vacio()
+			for j in cj do 
+				if obtener(j, r) = p then 
+					Agregar(res, j)
+				end if 
+			end for 
+		---
+		iPeorPuntaje(in r: ranking, in cj: conj(jugador)) -> res: nat  
+			it <- crearIt(cj)
+			peor <- Siguiente(it) 
+			for j in cj do 
+				if obtener(j, r) > peor then 
+				 	peor <- obtener(j, r)
+				end if 
+			end for 
+			res <- peor 	
+			
+			
+			
+			
+			
+			
+			
+			
+			

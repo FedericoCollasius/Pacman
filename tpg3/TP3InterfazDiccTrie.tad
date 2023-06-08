@@ -1,0 +1,63 @@
+Interfaz: Dicc Trie 
+	Operaciones básicas:
+		Vacío()	-> res: dicc(κ, σ)
+		Pre ≡ {true}
+		Post ≡ {res =obs vacio}
+		Complejidad: Θ(1)
+		Descripción: Genera un diccionario vacio
+		Aliasing: No presenta aspectos de aliasing.
+		---
+		Definir(in/out d : dicc(κ, σ), in k : κ, in s : σ)
+		Pre ≡ {d =obs d0}
+		Post ≡ {d =obs definir(d, k, s) ∧ haySiguiente(res)}	
+		Complejidad: O(|L| copy(k) + copy(s)) donde L es la clave mas larga
+		Descripcion: los elementos k y s se definen por copia. 
+		---
+		Definido?(in d : dicc(κ, σ), in k : κ) -> res:bool
+		Pre ≡ {true}
+		Post ≡ {res =obs def?(d, k)}
+		Complejidad: O(|L|) donde L es la clave mas larga
+		Descripcion: devuelve true si y solo si k está definido en el diccionario.
+		---
+		Significado(in d : dicc(κ, σ), in k : κ) -> res: σ
+		Pre ≡ {def?(d, k)}
+		Post ≡ {alias(res =obs Significado(d, k))}
+		Complejidad: O(|L|) donde L es la clave mas larga
+		Descripcion: devuelve el significado de la clave k en d.
+		Aliasing: res es modificable si y solo si d es modificable.
+		---
+		Borrar(in/out d : dicc(κ, σ), in k : κ)
+		Pre ≡ {d = d0 ∧ def?(d, k)}
+		Post ≡ {d =obs borrar(d0, k)}
+		Complejidad: O(|L|) donde K = claves(d)
+		Descripcion: elimina la clave k y su significado de d.
+		Aliasing: Genera aspectos de aliasing
+		---
+		#Claves(in d : dicc(κ, σ)) -> res:nat 
+		Pre ≡ {true}
+		Post ≡ {res =obs #claves(d)}
+		Complejidad: Θ(1)
+		Descripción: devuelve la cantidad de claves del diccionario.
+		---
+		Copiar(in d : dicc(κ, σ)) -> res: dicc(κ, σ)  
+		Pre ≡ {true}
+		Post ≡ {res =obs d}
+		Complejidad: Θ(Sumatoria de para todo k∈K (copy(k) + copy(significado(k, d)))), donde K = claves(d)
+		Descripción: genera una copia nueva del diccionario.
+		---
+		Equal(in d1 : dicc(κ, σ), in d2 : dicc(κ, σ)) → res : bool	// Equal se repsenta con "="
+		Pre ≡ {true}
+		Post ≡ {res =obs c1 = c2}
+		Complejidad: O(Sumatoria de k1∈K1,k2∈K2 (equal(<k1, s1>,<k2, s2>))) 		
+		Descripción: compara d1 y d2 por igualdad, cuando σ posee operacion de igualdad		
+		Requiere: •=•(in s₁:σ, in s₂:σ) -> res:bool
+		Pre≡ {true}
+		Post≡ {res=obs(s1=s2)}
+		Complejidad:Θ(equal(s₁,s₂))
+		Descripción: función de igualdad de σ’s
+		
+
+	
+
+
+	
